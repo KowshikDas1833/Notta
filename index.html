@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledger Notes, Memos, Spreadsheets & Calendar</title>
+<meta name="description" content="All-in-one app featuring photo notes, memos, shopping spreadsheet calculations, and calendar management.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2048%2048'%3E%3Crect%20x='1'%20y='1'%20width='46'%20height='46'%20rx='12'%20fill='%231A1A1A'/%3E%3Crect%20x='31'%20y='36'%20width='10'%20height='4'%20rx='2'%20fill='%23B8904A'/%3E%3Cg%20transform='translate(12%2012)'%20fill='none'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cg%20stroke='%23FFFFFF'%3E%3Ccircle%20cx='9'%20cy='14.5'%20r='5'/%3E%3Ccircle%20cx='15'%20cy='14.5'%20r='5'/%3E%3C/g%3E%3Cg%20stroke='%23B8904A'%3E%3Cpath%20d='M10%205.5l2-2.5%202%202.5-2%202z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
+<script>
+(function(){try{var t=JSON.parse(localStorage.getItem('ledgerNotes.theme'));if(typeof t==='string'&&/^[a-z-]+$/.test(t)&&t!=='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bc-primary:#1A1A1A;
+  --bc-secondary:#B8904A;
+  --bc-on-primary:#FFFFFF;
+  --bc-on-secondary:#1A1A1A;
+  --bc-font-heading:'EB Garamond', serif;
+  --bc-font-body:'Inter', sans-serif;
+  --ground:#F6F0E6;
+  --ink:#1A1A1A;
+  --quiet:#6B665C;
+  --hair:rgba(26,26,26,.12);
+  --hair-soft:rgba(26,26,26,.07);
+  --sheet:#FBF8F2;
+  --radius:24px;
+  --radius-sm:14px;
+  --shadow-soft:0 1px 2px rgba(0,0,0,.04), 0 12px 40px rgba(0,0,0,.08);
+  --shadow-lift:0 1px 2px rgba(0,0,0,.05), 0 18px 48px rgba(0,0,0,.14);
+  --shadow-btn:0 1px 2px rgba(0,0,0,.06), 0 8px 22px -8px rgba(var(--accent-rgb),.65);
+  --tint:rgba(26,26,26,.07);
+  --tint-hover:rgba(26,26,26,.12);
+  --tint-soft:rgba(26,26,26,.05);
+  --tint-faint:rgba(26,26,26,.015);
+  --day-muted:rgba(26,26,26,.26);
+  --field-bg:#FFFFFF;
+  --field-border:rgba(26,26,26,.18);
+  --tabbar-bg:rgba(246,240,230,.92);
+  --topbar-bg:#1A1A1A;
+  --danger:#9B3B34;
+  --accent-rgb:184,144,74;
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bc-primary:#E9E0CC;
+  --bc-on-primary:#1A1A1A;
+  --ground:#14120F;
+  --ink:#F1EBDD;
+  --quiet:#A39D90;
+  --hair:rgba(255,255,255,.14);
+  --hair-soft:rgba(255,255,255,.08);
+  --sheet:#1F1C18;
+  --shadow-soft:0 1px 2px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.4);
+  --shadow-lift:0 1px 2px rgba(0,0,0,.4), 0 18px 48px rgba(0,0,0,.6);
+  --tint:rgba(255,255,255,.08);
+  --tint-hover:rgba(255,255,255,.14);
+  --tint-soft:rgba(255,255,255,.06);
+  --tint-faint:rgba(255,255,255,.025);
+  --day-muted:rgba(255,255,255,.28);
+  --field-bg:#2A2621;
+  --field-border:rgba(255,255,255,.2);
+  --tabbar-bg:rgba(20,18,15,.92);
+  --topbar-bg:#0C0B09;
+  --danger:#E07A70;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;font-synthesis:none}
+html{font-size:16px;line-height:1.6}
+body{
+  font-family:var(--bc-font-body);
+  background:var(--ground);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:calc(82px + env(safe-area-inset-bottom));
+  transition: padding-bottom 0.3s ease;
+}
+h1,h2,h3,h4{font-family:var(--bc-font-heading);font-weight:600;letter-spacing:0;line-height:1.25;margin:0}
+p{margin:0 0 12px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+img{max-width:100%;height:auto;display:block}
+
+/* Topbar */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:var(--topbar-bg);
+  color:#fff;
+  padding:0 16px;
+  height:64px;
+  display:flex;align-items:center;gap:12px;
+  padding-top:env(safe-area-inset-top);
+}
+.logo-tile{
+  background:#fff;border-radius:12px;flex:none;
+  display:grid;place-items:center;
+  width:40px;height:40px;
+}
+.brand{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.brand b{font-family:var(--bc-font-heading);font-weight:600;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--bc-secondary);font-weight:600}
+.top-actions{margin-left:auto;display:flex;gap:8px;position:relative}
+.icon-btn{
+  width:42px;height:42px;border-radius:999px;border:0;background:rgba(255,255,255,.1);
+  color:#fff;display:grid;place-items:center;cursor:pointer;
+  transition:background-color .18s ease-out,transform .18s ease-out;
+}
+.icon-btn:hover{background:rgba(255,255,255,.2)}
+.icon-btn:active{transform:scale(.94)}
+:focus-visible{outline:3px solid var(--bc-secondary);outline-offset:2px}
+
+/* Topbar Dropdown Menu */
+.top-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--sheet);
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  min-width: 220px;
+  padding: 6px 0;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+html[data-theme="dark"] .top-menu { background: #2C2C2C; border-color: #444; }
+.top-menu.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.top-menu button {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px;
+  background: none; border: 0; text-align: left; font-size: 15px; font-weight: 500;
+  cursor: pointer; color: var(--ink); transition: background-color .15s;
+}
+.top-menu button:hover { background: var(--tint-soft); }
+.top-menu button svg { color: var(--quiet); }
+
+/* Shell */
+.shell{max-width:760px;margin:0 auto;padding:18px 14px 30px;display:flex;flex-direction:column;gap:24px}
+.view[hidden]{display:none}
+
+.sheet{position:relative;background:transparent;border-radius:0;box-shadow:none;padding:0;overflow:visible}
+.sheet::before{content:none}
+
+.sheet-head{display:flex;align-items:flex-end;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--hair)}
+.sheet-head h2{font-size:clamp(26px,6vw,34px)}
+.sheet-head .count{margin-left:auto;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--quiet);font-weight:600;white-space:nowrap}
+.sub{color:var(--quiet);font-size:14.5px;margin-top:6px}
+
+/* Notebook Rows */
+.rows{display:flex;flex-direction:column}
+.row{
+  display:flex;align-items:center;gap:10px;
+  min-height:60px;padding:10px 2px;
+  border-bottom:1px solid var(--hair-soft);
+  cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;
+  width:100%;text-align:left;
+  transition:background-color .18s ease-out;
+}
+.row:last-child{border-bottom:0}
+.row:hover{background:rgba(var(--accent-rgb),.06)}
+.row .thumb{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:none;background:var(--tint-soft)}
+.row .thumb-ph{
+  width:52px;height:52px;border-radius:12px;flex:none;
+  display:grid;place-items:center;background:var(--tint-soft);color:var(--quiet);
+}
+.row .meta{min-width:0;flex:1}
+.row .meta strong{display:block;font-family:var(--bc-font-heading);font-weight:600;font-size:18px;line-height:1.25;word-break:break-word}
+.row .meta em{font-style:normal;display:block;font-size:12.5px;color:var(--quiet);word-break:break-word}
+.row .meta em.note-date{margin-top:2px;font-size:12px;color:var(--bc-secondary);font-weight:600}
+.row .amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;white-space:nowrap}
+
+.row-del-btn{
+  width:38px;height:38px;border-radius:10px;border:0;background:transparent;
+  color:var(--danger);display:grid;place-items:center;cursor:pointer;flex:none;
+  transition:background-color .18s ease-out;
+}
+.row-del-btn:hover{background:rgba(155,59,52,.12)}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:0 20px;border-radius:999px;border:0;cursor:pointer;
+  font-weight:600;font-size:15px;
+  transition:transform .18s ease-out,box-shadow .18s ease-out,background-color .18s ease-out;
+}
+.btn-primary{background:var(--bc-primary);color:var(--bc-on-primary)}
+.btn-gold{background:var(--bc-secondary);color:var(--bc-on-secondary);box-shadow:var(--shadow-btn)}
+.btn-gold:hover{transform:translateY(-2px)}
+.btn-gold:active{transform:translateY(0) scale(.98)}
+.btn-quiet{background:var(--tint);color:var(--ink)}
+.btn-quiet:hover{background:var(--tint-hover)}
+.btn-danger{background:#9B3B34;color:#fff}
+.btn-danger:hover{background:#83302a}
+.btn-sm{min-height:42px;padding:0 16px;font-size:14px}
+
+/* ===== Extra eye-friendly themes ===== */
+html[data-theme="sepia"]{--bc-primary:#5B4636;--bc-secondary:#B07D3A;--bc-on-primary:#FFFFFF;--bc-on-secondary:#2B1F12;--accent-rgb:176,125,58;--ground:#F4ECD8;--ink:#3E3225;--quiet:#6F5F4B;--hair:rgba(62,50,37,.12);--hair-soft:rgba(62,50,37,.07);--sheet:#FBF5E6;--tint:rgba(62,50,37,.07);--tint-hover:rgba(62,50,37,.12);--tint-soft:rgba(62,50,37,.05);--tint-faint:rgba(62,50,37,.015);--day-muted:rgba(62,50,37,.26);--field-bg:#FFFDF7;--field-border:rgba(62,50,37,.18);--tabbar-bg:rgba(244,236,216,.92);--topbar-bg:#3A2D20;--danger:#9B3B34;color-scheme:light}
+html[data-theme="solarized-light"]{--bc-primary:#073642;--bc-secondary:#2176AE;--bc-on-primary:#FDF6E3;--bc-on-secondary:#FFFFFF;--accent-rgb:33,118,174;--ground:#FDF6E3;--ink:#073642;--quiet:#586E75;--hair:rgba(7,54,66,.12);--hair-soft:rgba(7,54,66,.07);--sheet:#F5EED9;--tint:rgba(7,54,66,.07);--tint-hover:rgba(7,54,66,.12);--tint-soft:rgba(7,54,66,.05);--tint-faint:rgba(7,54,66,.015);--day-muted:rgba(7,54,66,.26);--field-bg:#FFFDF5;--field-border:rgba(7,54,66,.18);--tabbar-bg:rgba(253,246,227,.92);--topbar-bg:#073642;--danger:#B8322A;color-scheme:light}
+html[data-theme="sage"]{--bc-primary:#2F5D46;--bc-secondary:#86B58F;--bc-on-primary:#FFFFFF;--bc-on-secondary:#14261B;--accent-rgb:134,181,143;--ground:#E8EFE4;--ink:#1F2D24;--quiet:#4F6155;--hair:rgba(31,45,36,.12);--hair-soft:rgba(31,45,36,.07);--sheet:#F4F8F1;--tint:rgba(31,45,36,.07);--tint-hover:rgba(31,45,36,.12);--tint-soft:rgba(31,45,36,.05);--tint-faint:rgba(31,45,36,.015);--day-muted:rgba(31,45,36,.26);--field-bg:#FFFFFF;--field-border:rgba(31,45,36,.18);--tabbar-bg:rgba(232,239,228,.92);--topbar-bg:#1E3A2B;--danger:#9B3B34;color-scheme:light}
+html[data-theme="ocean"]{--bc-primary:#2C5470;--bc-secondary:#6FA3C7;--bc-on-primary:#FFFFFF;--bc-on-secondary:#12212D;--accent-rgb:111,163,199;--ground:#E6EDF3;--ink:#1E2A35;--quiet:#516173;--hair:rgba(30,42,53,.12);--hair-soft:rgba(30,42,53,.07);--sheet:#F3F7FA;--tint:rgba(30,42,53,.07);--tint-hover:rgba(30,42,53,.12);--tint-soft:rgba(30,42,53,.05);--tint-faint:rgba(30,42,53,.015);--day-muted:rgba(30,42,53,.26);--field-bg:#FFFFFF;--field-border:rgba(30,42,53,.18);--tabbar-bg:rgba(230,237,243,.92);--topbar-bg:#1B3347;--danger:#9B3B34;color-scheme:light}
+html[data-theme="solarized-dark"]{--bc-primary:#2AA198;--bc-secondary:#B58900;--bc-on-primary:#002B36;--bc-on-secondary:#002B36;--accent-rgb:181,137,0;--ground:#002B36;--ink:#EEE8D5;--quiet:#93A1A1;--hair:rgba(255,255,255,.14);--hair-soft:rgba(255,255,255,.08);--sheet:#073642;--shadow-soft:0 1px 2px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.4);--shadow-lift:0 1px 2px rgba(0,0,0,.4), 0 18px 48px rgba(0,0,0,.6);--tint:rgba(255,255,255,.08);--tint-hover:rgba(255,255,255,.14);--tint-soft:rgba(255,255,255,.06);--tint-faint:rgba(255,255,255,.025);--day-muted:rgba(255,255,255,.28);--field-bg:#0A4150;--field-border:rgba(255,255,255,.2);--tabbar-bg:rgba(0,43,54,.92);--topbar-bg:#001F27;--danger:#F0786C;color-scheme:dark}
+html[data-theme="nord"]{--bc-primary:#88C0D0;--bc-secondary:#EBCB8B;--bc-on-primary:#2E3440;--bc-on-secondary:#2E3440;--accent-rgb:235,203,139;--ground:#2E3440;--ink:#ECEFF4;--quiet:#A9B2C3;--hair:rgba(255,255,255,.14);--hair-soft:rgba(255,255,255,.08);--sheet:#3B4252;--shadow-soft:0 1px 2px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.4);--shadow-lift:0 1px 2px rgba(0,0,0,.4), 0 18px 48px rgba(0,0,0,.6);--tint:rgba(255,255,255,.08);--tint-hover:rgba(255,255,255,.14);--tint-soft:rgba(255,255,255,.06);--tint-faint:rgba(255,255,255,.025);--day-muted:rgba(255,255,255,.28);--field-bg:#434C5E;--field-border:rgba(255,255,255,.2);--tabbar-bg:rgba(46,52,64,.92);--topbar-bg:#242933;--danger:#E58790;color-scheme:dark}
+html[data-theme="warm-dark"]{--bc-primary:#D79921;--bc-secondary:#8EC07C;--bc-on-primary:#282828;--bc-on-secondary:#1D2A17;--accent-rgb:142,192,124;--ground:#282828;--ink:#EBDBB2;--quiet:#A89984;--hair:rgba(255,255,255,.14);--hair-soft:rgba(255,255,255,.08);--sheet:#32302F;--shadow-soft:0 1px 2px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.4);--shadow-lift:0 1px 2px rgba(0,0,0,.4), 0 18px 48px rgba(0,0,0,.6);--tint:rgba(255,255,255,.08);--tint-hover:rgba(255,255,255,.14);--tint-soft:rgba(255,255,255,.06);--tint-faint:rgba(255,255,255,.025);--day-muted:rgba(255,255,255,.28);--field-bg:#3C3836;--field-border:rgba(255,255,255,.2);--tabbar-bg:rgba(40,40,40,.92);--topbar-bg:#1D1D1D;--danger:#E5786D;color-scheme:dark}
+
+/* Theme pellets */
+.theme-block{padding:14px 0 16px;border-bottom:1px solid var(--hair-soft)}
+.theme-block-head{display:flex;align-items:center;gap:10px}
+.theme-block-head .meta{min-width:0;flex:1}
+.theme-block-head .meta strong{display:block;font-family:var(--bc-font-heading);font-weight:600;font-size:18px;line-height:1.25}
+.theme-caption{font-style:normal;display:block;font-size:12.5px;color:var(--quiet);margin:2px 0 14px 62px}
+.theme-pellets{display:flex;flex-wrap:wrap;gap:12px;padding:2px 0 2px 62px}
+.pellet{
+  width:40px;height:40px;border-radius:50%;border:2px solid transparent;
+  cursor:pointer;padding:0;position:relative;
+  box-shadow:0 1px 3px rgba(0,0,0,.2), inset 0 0 0 1px rgba(128,128,128,.45);
+  transition:transform .15s ease-out, box-shadow .15s ease-out;
+}
+.pellet:hover{transform:scale(1.08)}
+.pellet[aria-pressed="true"]{
+  border-color:var(--bc-secondary);
+  box-shadow:0 0 0 3px rgba(var(--accent-rgb),.35), 0 1px 3px rgba(0,0,0,.2);
+}
+.pellet[aria-pressed="true"]::after{
+  content:"";position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8L10 16l-4-4'/%3E%3C/svg%3E") center/16px no-repeat, rgba(0,0,0,.6);
+  box-shadow:0 0 0 1px rgba(255,255,255,.5);
+}
+@media (max-width:420px){
+  .theme-caption{margin-left:0}
+  .theme-pellets{padding-left:0}
+}
+
+/* Fields */
+label.f-label{display:block;font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--quiet);margin:12px 0 6px}
+input,select,textarea{
+  width:100%;height:48px;padding:0 14px;font-size:15px;
+  background:var(--field-bg);border:1px solid var(--field-border);border-radius:var(--radius-sm);
+  transition:border-color .18s ease-out,box-shadow .18s ease-out;
+}
+textarea{height:auto;padding:12px 14px;line-height:1.6;resize:vertical;min-height:100px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--bc-secondary);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.25);outline:none}
+
+/* Empty state */
+.empty{text-align:center;padding:34px 16px 26px;color:var(--quiet)}
+.empty svg{color:var(--bc-secondary);margin:0 auto 12px}
+.empty strong{display:block;font-family:var(--bc-font-heading);font-weight:600;font-size:22px;color:var(--ink);margin-bottom:4px}
+.empty p{font-size:14px;max-width:34ch;margin:0 auto 16px}
+
+/* Notes detail */
+.note-photo{width:100%;max-height:300px;object-fit:cover;border-radius:var(--radius-sm);margin:12px 0}
+
+/* Spreadsheet */
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px -12px 0 -16px;padding:0 12px 0 16px}
+table.ss{border-collapse:collapse;width:100%;min-width:480px;font-size:14px}
+table.ss th,table.ss td{border:1px solid var(--hair);padding:0;position:relative}
+table.ss thead th{
+  background:var(--tint-soft);height:40px;
+  font-family:var(--bc-font-body);font-weight:600;font-size:13px;color:var(--ink);
+  padding:0 4px;text-align:left;
+}
+table.ss thead th input.hd{
+  height:34px;border:1px solid transparent;background:transparent;font-weight:600;font-size:13px;padding:0 4px;border-radius:6px;width:100%;
+}
+table.ss thead th input.hd:hover,table.ss thead th input.hd:focus-visible{background:var(--field-bg);border-color:var(--bc-secondary)}
+table.ss td .cell{
+  width:100%;height:44px;border:0;background:transparent;border-radius:0;padding:0 6px;
+  font-variant-numeric:tabular-nums;font-size:14px;
+}
+table.ss td.num .cell{text-align:right;font-weight:600}
+table.ss td .cell:focus{outline:2px solid var(--bc-secondary);background:var(--field-bg)}
+table.ss tbody tr:nth-child(even){background:var(--tint-faint)}
+table.ss tbody tr.totals{background:rgba(var(--accent-rgb),.15);font-weight:700}
+table.ss tbody tr.totals td{padding:10px 12px;font-variant-numeric:tabular-nums}
+table.ss td.delcell{width:40px;text-align:center}
+table.ss td.delcell button{
+  width:34px;height:34px;border:0;background:transparent;color:var(--danger);border-radius:8px;cursor:pointer;display:grid;place-items:center;margin:0 auto;
+}
+table.ss td.delcell button:hover{background:rgba(155,59,52,.12)}
+
+/* Calendar */
+.cal-head{display:flex;align-items:center;gap:10px;margin:12px 0 10px}
+.cal-head h3{font-size:24px;flex:1}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-grid .dow{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--quiet);text-align:center;font-weight:600;padding-bottom:4px}
+.cal-day{
+  aspect-ratio:1;border:0;background:transparent;border-radius:12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:14px;font-variant-numeric:tabular-nums;position:relative;min-height:40px;
+  transition:background-color .18s ease-out;
+}
+.cal-day:hover{background:var(--tint-soft)}
+.cal-day.muted{color:var(--day-muted)}
+.cal-day.today{box-shadow:inset 0 0 0 2px var(--bc-secondary)}
+.cal-day.selected{background:var(--bc-primary);color:var(--bc-on-primary)}
+.cal-day .dot{width:5px;height:5px;border-radius:50%;background:var(--bc-secondary)}
+.cal-day.selected .dot{background:var(--bc-secondary)}
+.ev-row{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--hair-soft)}
+.ev-row:last-child{border-bottom:0}
+.ev-time{font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px;min-width:60px;color:var(--bc-secondary)}
+.ev-body{min-width:0;flex:1}
+.ev-body strong{display:block;font-size:15px;font-weight:600}
+.ev-body em{font-style:normal;font-size:13px;color:var(--quiet)}
+
+/* Routine view */
+.routine-day{margin-bottom:8px}
+.routine-day .routine-date{
+  font-family:var(--bc-font-heading);font-weight:600;font-size:18px;
+  padding:12px 2px 6px;border-bottom:1px solid var(--hair-soft);margin-bottom:2px;
+  display:flex;align-items:baseline;gap:8px;
+}
+.routine-day .routine-empty{font-size:13.5px;color:var(--quiet);padding:10px 2px;font-style:italic}
+
+/* Bottom navigation */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--tabbar-bg);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-top:1px solid var(--hair);
+  padding-bottom:env(safe-area-inset-bottom);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.tabbar.hidden-nav {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.tabbar-inner{
+  max-width:760px;margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr 76px 1fr 1fr;
+  align-items:center;height:64px;
+}
+.tab{
+  background:none;border:0;cursor:pointer;height:64px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--quiet);font-size:11px;font-weight:600;
+  transition:color .18s ease-out;
+}
+.tab[aria-current="page"]{color:var(--bc-primary)}
+.tab[aria-current="page"] svg{color:var(--bc-secondary)}
+.tab:hover{color:var(--bc-primary)}
+
+/* FAB cell keeps its slot so the tabs never shift */
+.fab-cell{display:grid;place-items:center;height:64px}
+.fab{
+  width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--bc-primary);color:var(--bc-on-primary);
+  display:grid;place-items:center;margin-top:-16px;
+  box-shadow:0 2px 4px rgba(0,0,0,.12),0 14px 28px -8px rgba(26,26,26,.65);
+  transition:transform .18s ease-out, opacity .18s ease-out, filter .18s ease-out;
+}
+.fab:hover{transform:translateY(-2px)}
+.fab:active{transform:scale(.95)}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%) translateY(14px);
+  bottom:calc(76px + env(safe-area-inset-bottom));z-index:70;
+  background:var(--bc-primary);color:var(--bc-on-primary);
+  padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;
+  box-shadow:var(--shadow-lift);opacity:0;pointer-events:none;
+  transition:opacity .22s ease-out,transform .22s ease-out;max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Dialog */
+.backdrop{
+  position:fixed;inset:0;background:rgba(26,26,26,.5);z-index:80;
+  display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;
+  transition:opacity .24s ease-out;
+}
+.backdrop.open{opacity:1;pointer-events:auto}
+.dialog{
+  background:var(--sheet);border-radius:var(--radius);padding:22px;max-width:440px;width:100%;
+  box-shadow:var(--shadow-lift);transform:translateY(10px) scale(.98);
+  transition:transform .24s cubic-bezier(.23,1,.32,1);max-height:86vh;overflow:auto;
+}
+.backdrop.open .dialog{transform:none}
+.dialog h3{font-size:24px;margin-bottom:6px}
+.dialog-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.dialog-actions .btn{flex:1;min-width:120px}
+
+/* Desktop Navigation */
+.rail{display:none}
+@media (min-width:900px){
+  body{padding-bottom:30px}
+  .shell{max-width:1000px;display:grid;grid-template-columns:200px minmax(0,760px);gap:28px;align-items:start;padding-left:14px}
+  .rail{position:sticky;top:86px;display:flex;flex-direction:column;gap:4px;grid-row:1;grid-column:1;transition: opacity 0.3s ease;}
+  .rail.hidden-nav { opacity: 0; pointer-events: none; }
+  .rail button{
+    display:flex;align-items:center;gap:12px;min-height:46px;padding:0 16px;border-radius:14px;
+    background:none;border:0;cursor:pointer;color:var(--quiet);font-weight:600;font-size:14.5px;text-align:left;
+    transition:background-color .18s ease-out,color .18s ease-out;
+  }
+  .rail button:hover{background:var(--tint-soft)}
+  .rail button[aria-current="page"]{background:var(--bc-primary);color:var(--bc-on-primary)}
+  .rail button[aria-current="page"] svg{color:var(--bc-secondary)}
+  #viewsArea{grid-row:1;grid-column:2}
+  .tabbar{display:none}
+  .toast{bottom:24px}
+  .rail .fab-wrap{margin:14px 4px;justify-self:start}
+  .rail .fab{margin-top:0}
+}
+
+@media print{
+  html[data-theme]{--ink:#1A1A1A;--quiet:#6B665C;--hair:rgba(26,26,26,.12);--hair-soft:rgba(26,26,26,.07);--bc-primary:#1A1A1A;--bc-on-primary:#FFFFFF;--tint:rgba(26,26,26,.07);--tint-hover:rgba(26,26,26,.12);--tint-soft:rgba(26,26,26,.05);--tint-faint:rgba(26,26,26,.015);--field-bg:#fff;--field-border:rgba(26,26,26,.18);--danger:#9B3B34;color-scheme:light}
+  html[data-theme] body{background:#fff}
+  .topbar,.tabbar,.no-print,.rail{display:none !important}
+  body{background:#fff;padding:0}
+  .sheet,.dialog{box-shadow:none;border-radius:0;background:#fff}
+  .sheet::before{display:none}
+}
+</style>
+<meta property="og:title" content="Ledger Notes, Memos, Spreadsheets & Calendar">
+<meta property="og:description" content="All-in-one app featuring photo notes, memos, shopping spreadsheet calculations, and calendar management.">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo-tile">
+    <svg width="28" height="28" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="#1A1A1A"/><rect x="31" y="36" width="10" height="4" rx="2" fill="#B8904A"/><g transform="translate(12 12)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g stroke="#FFFFFF"><circle cx="9" cy="14.5" r="5"/><circle cx="15" cy="14.5" r="5"/></g><g stroke="#B8904A"><path d="M10 5.5l2-2.5 2 2.5-2 2z"/></g></g></svg>
+  </div>
+  <div class="brand">
+    <b>MyTasks</b>
+    <span>PERSONAL WORKSPACE</span>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="btnMenu" title="Menu" aria-label="Menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <div class="top-menu" id="topMenu">
+      <button id="menuBackup">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+        Backup
+      </button>
+      <button id="menuSettings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Sections">
+    <button data-view="notes" aria-current="page">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H16l4 4v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5z"/><path d="M15 3v5h5"/></svg>
+      Notes & Memos
+    </button>
+    <button data-view="sheets">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M3 15h18M9 4v16M15 4v16"/></svg>
+      Spreadsheets
+    </button>
+    <button data-view="cal">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Calendar
+    </button>
+    <button data-view="routine">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Routine
+    </button>
+    <div class="fab-wrap" id="railFabWrap">
+      <button class="fab" id="railFabAdd" title="Add new">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="viewsArea">
+
+    <!-- ================= NOTES ================= -->
+    <section class="view" id="view-notes">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h2>Notes & Memos</h2>
+          <span class="count" id="notesCount">0 Memos</span>
+        </div>
+        <p class="sub">Write new memos and attach photos. Tap on a note to edit or view details.</p>
+        <div id="notesList" class="rows" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- ================= SHEETS ================= -->
+    <section class="view" id="view-sheets" hidden>
+      <div class="sheet" id="sheetsIndex">
+        <div class="sheet-head">
+          <h2>Tablesheet List</h2>
+          <span class="count" id="sheetsCount">0 Sheets</span>
+        </div>
+        <p class="sub">Each spreadsheet is saved with a custom title. Click the trash icon to delete a sheet.</p>
+        <div id="sheetsList" class="rows" style="margin-top:12px"></div>
+        <p id="sheetsLastModified" style="font-size:12px;color:var(--quiet);margin-top:8px"></p>
+      </div>
+
+      <div class="sheet" id="sheetEditor" hidden>
+        <div class="sheet-head">
+          <div style="min-width:0;flex:1">
+            <span class="count" style="margin:0 0 2px;display:block">Edit Spreadsheet</span>
+            <input id="sheetName" style="height:42px;font-family:var(--bc-font-heading);font-size:22px;border:1px solid transparent;padding:0 6px" aria-label="Sheet title">
+          </div>
+        </div>
+        <p class="sub">Type directly into headers to change column titles. Quantity (Col 2) × Unit Price (Col 3) calculates Total (Col 4). Use a minus sign (-) to subtract.</p>
+
+        <div class="tablewrap">
+          <table class="ss" id="ssTable">
+            <thead><tr id="ssHead"></tr></thead>
+            <tbody id="ssBody"></tbody>
+            <tfoot>
+              <tr class="totals">
+                <td colspan="3" style="text-align:right">Grand Total:</td>
+                <td id="ssGrandTotal" style="text-align:right">0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="dialog-actions no-print" style="margin-top:20px">
+          <button class="btn btn-quiet btn-sm" id="btnAddRow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Row
+          </button>
+          <button class="btn btn-quiet btn-sm" id="btnCsv">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-primary btn-sm" id="btnCloseSheet">Close</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CALENDAR ================= -->
+    <section class="view" id="view-cal" hidden>
+      <div class="sheet">
+        <div class="sheet-head">
+          <h2>Calendar & Events</h2>
+          <span class="count" id="calCount">0 Events</span>
+        </div>
+        <div class="cal-head">
+          <button class="icon-btn" id="prevMonth" style="background:var(--tint);color:var(--ink)" aria-label="Previous month">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <h3 id="monthLabel" style="font-size:22px;text-align:center">Month</h3>
+          <button class="icon-btn" id="nextMonth" style="background:var(--tint);color:var(--ink)" aria-label="Next month">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div id="dayEvents" style="margin-top:20px"></div>
+      </div>
+    </section>
+
+    <!-- ================= ROUTINE ================= -->
+    <section class="view" id="view-routine" hidden>
+      <div class="sheet">
+        <div class="sheet-head">
+          <h2>Routine</h2>
+          <span class="count" id="routineCount">0 Days</span>
+        </div>
+        <p class="sub">A chronological look at your scheduled events, grouped by day. Add, review, and manage your routine here.</p>
+        <div id="routineList" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- ================= BACKUP & RESTORE ================= -->
+    <section class="view" id="view-backup" hidden>
+      <div class="sheet">
+        <button class="btn btn-quiet btn-sm" style="margin-bottom:18px" onclick="leaveSubview()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to App
+        </button>
+        <div class="sheet-head"><h2>Backup & Restore</h2></div>
+        <p class="sub">All notes, spreadsheets, and calendar entries are saved locally in your browser. Export to transfer data to another device.</p>
+        <div class="rows" style="margin-top:10px">
+          <button class="row" id="btnExport">
+            <span class="thumb-ph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span>
+            <span class="meta"><strong>Download Backup</strong><em>Save all app data as a JSON file</em></span>
+          </button>
+          <button class="row" id="btnImport">
+            <span class="thumb-ph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14l5-5 5 5"/><path d="M12 9v12"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span>
+            <span class="meta"><strong>Restore Backup</strong><em>Select a JSON backup file to restore</em></span>
+          </button>
+          <button class="row" id="btnWipe">
+            <span class="thumb-ph" style="color:var(--danger)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+            <span class="meta"><strong style="color:var(--danger)">Wipe All Data</strong><em>Permanently delete all notes, sheets, and events</em></span>
+          </button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="view" id="view-settings" hidden>
+      <div class="sheet">
+        <button class="btn btn-quiet btn-sm" style="margin-bottom:18px" onclick="leaveSubview()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to App
+        </button>
+        <div class="sheet-head"><h2>Settings</h2></div>
+        <p class="sub">Customize your app experience and appearance.</p>
+        <div class="rows" style="margin-top:10px">
+          <div class="theme-block" style="cursor:default">
+            <div class="theme-block-head">
+              <span class="thumb-ph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>
+              <span class="meta"><strong>Theme</strong></span>
+            </div>
+            <em class="theme-caption">Pick an eye-friendly colour theme</em>
+            <div class="theme-pellets" id="themePellets" role="radiogroup" aria-label="Select theme"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================ BOTTOM TABS ================ -->
+<nav class="tabbar" id="mainTabbar" aria-label="Main navigation">
+  <div class="tabbar-inner">
+    <button class="tab" data-view="notes" aria-current="page">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H16l4 4v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5z"/><path d="M15 3v5h5"/></svg>
+      Notes
+    </button>
+    <button class="tab" data-view="sheets">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M3 15h18M9 4v16M15 4v16"/></svg>
+      Sheets
+    </button>
+    <div class="fab-cell">
+      <button class="fab" id="fabAdd" aria-label="Add new">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <button class="tab" data-view="cal">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Calendar
+    </button>
+    <button class="tab" data-view="routine">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Routine
+    </button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="backdrop" id="backdrop">
+  <div class="dialog" id="dialog" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+/* Safe Local Storage Wrapper */
+const store = (() => {
+  let mem = {};
+  try {
+    localStorage.setItem('__t', '1'); localStorage.removeItem('__t');
+    return {
+      get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } },
+      set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} },
+      del: (k) => { try { localStorage.removeItem(k) } catch {} }
+    };
+  } catch {
+    return {
+      get: (k, d) => (k in mem ? mem[k] : d),
+      set: (k, v) => { mem[k] = v },
+      del: (k) => { delete mem[k] }
+    };
+  }
+})();
+
+const KEY = 'ledgerNotes.v3';
+let DB = store.get(KEY, null);
+
+if (!DB || !Array.isArray(DB.notes)) {
+  DB = seedData();
+  store.set(KEY, DB);
+}
+
+function save() { store.set(KEY, DB); }
+
+let activeView = 'notes';
+let currentCalDate = new Date();
+let selectedCalDate = new Date();
+let currentSheetId = null;
+
+function seedData() {
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    notes: [
+      { id: 'n1', title: 'Weekly Grocery List & Memo', content: 'Buy rice, olive oil, fresh vegetables, and organic eggs. Keep the receipt from the supermarket.', photo: '', updatedAt: today },
+      { id: 'n2', title: 'Utility & Internet Bills Memo', content: 'Pay the monthly electricity, water, and internet bills before the 15th via online banking app.', photo: '', updatedAt: today }
+    ],
+    sheets: [
+      {
+        id: 's1',
+        name: 'Weekly Grocery Budget',
+        headers: ['Item Name', 'Quantity', 'Unit Price', 'Total'],
+        rows: [['Organic Rice','5','12',''],['Olive Oil','2','18',''],['Fresh Eggs','3','6',''],['Member Discount','1','-5','']],
+        updatedAt: today
+      }
+    ],
+    events: [
+      { id: 'e1', date: today, time: '10:00', title: 'Grocery Shopping', note: 'Supermarket visit for weekly groceries' }
+    ]
+  };
+}
+
+/* Helpers */
+function parseVal(str) {
+  if (str === null || str === undefined) return 0;
+  str = String(str).trim();
+  if (!str) return 0;
+  if (/^[0-9\.\+\-\*\/\(\)\s]+$/.test(str)) {
+    try {
+      let val = Function('"use strict"; return (' + str + ')')();
+      return isNaN(val) || !isFinite(val) ? 0 : val;
+    } catch(e) { return 0; }
+  }
+  let num = parseFloat(str);
+  return isNaN(num) ? 0 : num;
+}
+
+function formatCurrency(num) {
+  return Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+const backdrop = document.getElementById('backdrop');
+const dialog = document.getElementById('dialog');
+
+function openModal(html) { dialog.innerHTML = html; backdrop.classList.add('open'); }
+function closeModal() { backdrop.classList.remove('open'); }
+backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+/* ---------- History / Back-button handling ----------
+   Stack model:  [root] -> [main] -> [subview (settings/backup)] ...
+   - "root" is a sentinel entry; reaching it means the user pressed Back on a
+     main tab, so we ask "Exit App?" and re-push "main".
+   - Menu and modals do NOT own history entries. If Back is pressed while one
+     is open, we close it and restore the entry that was popped.
+   - The "main" entry is pushed on the first user gesture, because browsers
+     (Chrome/Android WebView) skip history entries created with no interaction.
+*/
+let cur = { type: 'root' };
+let mainPushed = false;
+let lastMainView = 'notes';
+
+function pushS(state) { history.pushState(state, '', ''); cur = state; }
+
+function ensureMainEntry() {
+  if (mainPushed) return;
+  mainPushed = true;
+  pushS({ type: 'main' });
+}
+
+history.replaceState({ type: 'root' }, '', '');
+['pointerdown', 'touchstart', 'keydown', 'click'].forEach(evt =>
+  window.addEventListener(evt, ensureMainEntry, { capture: true, once: true, passive: true })
+);
+
+/* Top Menu Dropdown Logic */
+const btnMenu = document.getElementById('btnMenu');
+const topMenu = document.getElementById('topMenu');
+
+function hideMenu() {
+  topMenu.classList.remove('show');
+  btnMenu.setAttribute('aria-expanded', 'false');
+}
+
+btnMenu.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = topMenu.classList.toggle('show');
+  btnMenu.setAttribute('aria-expanded', isOpen);
+});
+
+document.addEventListener('click', (e) => {
+  if (!topMenu.contains(e.target) && !btnMenu.contains(e.target) && topMenu.classList.contains('show')) {
+    hideMenu();
+  }
+});
+
+function openSubview(viewName) {
+  ensureMainEntry();
+  hideMenu();
+  switchView(viewName);
+  pushS({ type: 'subview', view: viewName });
+}
+
+document.getElementById('menuBackup').addEventListener('click', () => openSubview('backup'));
+document.getElementById('menuSettings').addEventListener('click', () => openSubview('settings'));
+
+/* Navigation (history is handled by openSubview / popstate, never here) */
+function switchView(viewName) {
+  activeView = viewName;
+  document.querySelectorAll('.view').forEach(v => v.hidden = true);
+  const target = document.getElementById('view-' + viewName);
+  if (target) target.hidden = false;
+
+  document.querySelectorAll('.tabbar .tab, .rail button[data-view]').forEach(btn => {
+    if (btn.dataset.view === viewName) btn.setAttribute('aria-current', 'page');
+    else btn.removeAttribute('aria-current');
+  });
+
+  /* Hide bottom navigation and desktop rail in Backup/Settings views */
+  const isSettingsView = (viewName === 'backup' || viewName === 'settings');
+  if (!isSettingsView) lastMainView = viewName;
+  const tabbar = document.getElementById('mainTabbar');
+  const rail = document.getElementById('rail');
+
+  if (tabbar) tabbar.classList.toggle('hidden-nav', isSettingsView);
+  if (rail) rail.classList.toggle('hidden-nav', isSettingsView);
+
+  document.body.style.paddingBottom = isSettingsView ? '0' : 'calc(82px + env(safe-area-inset-bottom))';
+
+  if (viewName === 'notes') renderNotes();
+  if (viewName === 'sheets') renderSheets();
+  if (viewName === 'cal') { renderCalendar(); renderEventsForDate(selectedCalDate); }
+  if (viewName === 'routine') renderRoutine();
+}
+
+// In-page "Back" buttons inside Settings/Backup: use real history so the stack stays in sync
+window.leaveSubview = () => {
+  if (cur.type === 'subview') history.back();
+  else switchView(lastMainView);
+};
+
+let exiting = false;
+
+window.addEventListener('popstate', (e) => {
+  if (exiting) return;
+
+  const popped = cur;                       // entry the user just left
+  cur = e.state || { type: 'root' };        // entry we landed on
+
+  // 1. Menu open: close it and restore the entry that was popped
+  if (topMenu.classList.contains('show')) {
+    hideMenu();
+    pushS(popped);
+    return;
+  }
+
+  // 2. Modal open (including the exit dialog): close it, restore entry
+  if (backdrop.classList.contains('open')) {
+    closeModal();
+    pushS(popped);
+    return;
+  }
+
+  // 3. Settings/Backup history entries
+  if (cur.type === 'subview') { switchView(cur.view); return; }
+
+  // 4. Back from a subview to the main tab we came from
+  if (cur.type === 'main') { switchView(lastMainView); return; }
+
+  // 5. Root reached from a main tab: ask before exiting
+  pushS({ type: 'main' });
+  openModal(`
+    <h3>Exit App?</h3>
+    <p>Are you sure you want to exit the app?</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-quiet" onclick="closeModal()">No</button>
+      <button type="button" class="btn btn-primary" onclick="confirmExit()">Yes</button>
+    </div>
+  `);
+});
+
+// "Yes" pressed: leave the app (skip our [root] and [main] entries)
+window.confirmExit = () => {
+  closeModal();
+  exiting = true;
+  history.go(-2);
+  setTimeout(() => { exiting = false; }, 800); // in case there is nothing to go back to
+};
+
+/* Tab bindings - No history pushed for main tabs */
+document.querySelectorAll('.tabbar .tab, .rail button[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.view;
+    if (v) switchView(v);
+  });
+});
+
+document.getElementById('fabAdd').addEventListener('click', handleFab);
+document.getElementById('railFabAdd').addEventListener('click', handleFab);
+
+function handleFab() {
+  if (activeView === 'notes') openNoteForm();
+  else if (activeView === 'sheets') openSheetModal();
+  else if (activeView === 'cal') openEventModal(formatDateStr(selectedCalDate));
+  else if (activeView === 'routine') openEventModal(formatDateStr(new Date()));
+  else openNoteForm();
+}
+
+/* ================= NOTES LOGIC ================= */
+function formatNoteDate(str) {
+  if (!str) return 'Unknown';
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+  if (!m) return str;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function renderNotes() {
+  const container = document.getElementById('notesList');
+  document.getElementById('notesCount').textContent = `${DB.notes.length} Memos`;
+
+  if (DB.notes.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H16l4 4v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5z"/><path d="M15 3v5h5"/><path d="M8 13h8M8 17h5"/></svg>
+        <strong>No Notes or Memos</strong>
+        <p>Tap the + button to create a new note with optional photo attachment.</p>
+        <button class="btn btn-gold btn-sm" onclick="openNoteForm()">Create Note</button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = DB.notes.map(n => `
+    <div class="row">
+      ${n.photo 
+        ? `<img data-bc-template src="${n.photo}" class="thumb" alt="Note attachment">` 
+        : `<div class="thumb-ph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H16l4 4v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5z"/></svg></div>`}
+      <div class="meta" onclick="openNoteForm('${n.id}')">
+        <strong>${escapeHtml(n.title || 'Untitled Note')}</strong>
+        <em>${escapeHtml(n.content || 'No content')}</em>
+        <em class="note-date">Last updated: ${escapeHtml(formatNoteDate(n.updatedAt))}</em>
+      </div>
+      <button class="row-del-btn" onclick="event.stopPropagation(); deleteNote('${n.id}')" title="Delete note">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+function openNoteForm(id = null) {
+  const note = id ? DB.notes.find(n => n.id === id) : { title: '', content: '', photo: '' };
+  openModal(`
+    <h3>${id ? 'Edit Note' : 'New Note'}</h3>
+    <form id="noteFrm">
+      <label class="f-label">Title</label>
+      <input type="text" id="nTitle" value="${escapeHtml(note.title)}" placeholder="Note Title" required>
+      <label class="f-label">Content / Memo Details</label>
+      <textarea id="nContent" rows="4" placeholder="Write your memo here...">${escapeHtml(note.content)}</textarea>
+      <label class="f-label">Attach Photo</label>
+      <input type="file" id="nPhotoFile" accept="image/*" style="height:auto;padding:8px">
+      <div id="photoPreviewArea">
+        ${note.photo ? `<img data-bc-template src="${note.photo}" class="note-photo"><button type="button" class="btn btn-quiet btn-sm" onclick="clearPhoto()" style="margin-bottom:10px">Remove Photo</button>` : ''}
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-quiet" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">${id ? 'Save Changes' : 'Create Note'}</button>
+      </div>
+    </form>
+  `);
+
+  let currentPhotoData = note.photo || '';
+  const fileInput = document.getElementById('nPhotoFile');
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        currentPhotoData = ev.target.result;
+        document.getElementById('photoPreviewArea').innerHTML = `
+          <img data-bc-template src="${currentPhotoData}" class="note-photo">
+          <button type="button" class="btn btn-quiet btn-sm" onclick="clearPhoto()" style="margin-bottom:10px">Remove Photo</button>
+        `;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  window.clearPhoto = () => {
+    currentPhotoData = '';
+    document.getElementById('photoPreviewArea').innerHTML = '';
+    fileInput.value = '';
+  };
+
+  document.getElementById('noteFrm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('nTitle').value.trim();
+    const content = document.getElementById('nContent').value.trim();
+    const today = formatDateStr(new Date());
+
+    if (id) {
+      const idx = DB.notes.findIndex(n => n.id === id);
+      if (idx !== -1) DB.notes[idx] = { id, title, content, photo: currentPhotoData, updatedAt: today };
+    } else {
+      DB.notes.unshift({ id: 'n_' + Date.now(), title, content, photo: currentPhotoData, updatedAt: today });
+    }
+
+    save(); closeModal(); renderNotes(); toast('Note saved');
+  });
+}
+
+function deleteNote(id) {
+  if (confirm('Delete this note permanently?')) {
+    DB.notes = DB.notes.filter(n => n.id !== id);
+    save(); renderNotes(); toast('Note deleted');
+  }
+}
+
+/* ================= SPREADSHEETS LOGIC ================= */
+function renderSheets() {
+  document.getElementById('sheetsIndex').hidden = false;
+  document.getElementById('sheetEditor').hidden = true;
+  currentSheetId = null;
+
+  const container = document.getElementById('sheetsList');
+  document.getElementById('sheetsCount').textContent = `${DB.sheets.length} Sheets`;
+
+  if (DB.sheets.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M3 15h18M9 4v16M15 4v16"/></svg>
+        <strong>No Spreadsheets Saved</strong>
+        <p>Create separate named spreadsheets for shopping lists, budgets, or calculations.</p>
+        <button class="btn btn-gold btn-sm" onclick="openSheetModal()">New Spreadsheet</button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = DB.sheets.map(s => {
+    let grand = 0;
+    (s.rows || []).forEach(r => { grand += parseVal(r[1]) * parseVal(r[2]); });
+    return `
+      <div class="row">
+        <div class="thumb-ph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M9 4v16"/></svg>
+        </div>
+        <div class="meta" onclick="openSheetEditor('${s.id}')">
+          <strong>${escapeHtml(s.name || 'Untitled Sheet')}</strong>
+          <em>${s.rows.length} rows</em>
+          <em class="note-date">Last updated: ${escapeHtml(formatNoteDate(s.updatedAt))}</em>
+        </div>
+        <span class="amt">${formatCurrency(grand)}</span>
+        <button class="row-del-btn" onclick="event.stopPropagation(); deleteSheet('${s.id}')" title="Delete spreadsheet">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function openSheetModal() {
+  openModal(`
+    <h3>New Spreadsheet</h3>
+    <form id="newSheetFrm">
+      <label class="f-label">Spreadsheet Title</label>
+      <input type="text" id="sheetTitleInput" placeholder="e.g. Weekly Supermarket Purchase" required>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-quiet" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Sheet</button>
+      </div>
+    </form>
+  `);
+
+  document.getElementById('newSheetFrm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('sheetTitleInput').value.trim();
+    const newSheet = {
+      id: 's_' + Date.now(), name,
+      headers: ['Item Name', 'Quantity', 'Unit Price', 'Total'],
+      rows: [['Item 1', '1', '0', ''], ['Item 2', '1', '0', '']],
+      updatedAt: formatDateStr(new Date())
+    };
+    DB.sheets.unshift(newSheet);
+    save(); closeModal(); openSheetEditor(newSheet.id); toast('Spreadsheet created');
+  });
+}
+
+function openSheetEditor(id) {
+  currentSheetId = id;
+  const sheet = DB.sheets.find(s => s.id === id);
+  if (!sheet) return;
+
+  document.getElementById('sheetsIndex').hidden = true;
+  document.getElementById('sheetEditor').hidden = false;
+
+  const nameInput = document.getElementById('sheetName');
+  nameInput.value = sheet.name;
+  nameInput.onchange = () => {
+    sheet.name = nameInput.value.trim() || 'Untitled Sheet';
+    sheet.updatedAt = formatDateStr(new Date());
+    save();
+  };
+
+  renderTableRows(sheet);
+}
+
+function renderTableRows(sheet) {
+  const headTr = document.getElementById('ssHead');
+  headTr.innerHTML = sheet.headers.map((h, colIdx) => `
+    <th><input class="hd" value="${escapeHtml(h)}" onchange="updateHeader(${colIdx}, this.value)"></th>
+  `).join('') + '<th style="width:40px"></th>';
+
+  const body = document.getElementById('ssBody');
+  let grandTotal = 0;
+
+  body.innerHTML = sheet.rows.map((row, rIdx) => {
+    let total = parseVal(row[1]) * parseVal(row[2]);
+    grandTotal += total;
+    return `
+      <tr>
+        <td><input class="cell" value="${escapeHtml(row[0]||'')}" onchange="updateCell(${rIdx}, 0, this.value)"></td>
+        <td class="num"><input class="cell" value="${escapeHtml(row[1]||'')}" onchange="updateCell(${rIdx}, 1, this.value)"></td>
+        <td class="num"><input class="cell" value="${escapeHtml(row[2]||'')}" onchange="updateCell(${rIdx}, 2, this.value)"></td>
+        <td class="num" style="padding:0 8px;font-weight:600;display:flex;align-items:center;justify-content:flex-end;height:46px">${formatCurrency(total)}</td>
+        <td class="delcell">
+          <button onclick="deleteRow(${rIdx})" title="Delete row">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('ssGrandTotal').textContent = formatCurrency(grandTotal);
+}
+
+function updateHeader(colIdx, val) {
+  const sheet = DB.sheets.find(s => s.id === currentSheetId);
+  if (!sheet) return;
+  sheet.headers[colIdx] = val; save();
+}
+
+function updateCell(rIdx, colIdx, val) {
+  const sheet = DB.sheets.find(s => s.id === currentSheetId);
+  if (!sheet) return;
+  sheet.rows[rIdx][colIdx] = val;
+  sheet.updatedAt = formatDateStr(new Date());
+  save(); renderTableRows(sheet);
+}
+
+function deleteRow(rIdx) {
+  const sheet = DB.sheets.find(s => s.id === currentSheetId);
+  if (!sheet) return;
+  sheet.rows.splice(rIdx, 1); save(); renderTableRows(sheet);
+}
+
+document.getElementById('btnAddRow').addEventListener('click', () => {
+  const sheet = DB.sheets.find(s => s.id === currentSheetId);
+  if (!sheet) return;
+  sheet.rows.push(['New Item', '1', '0', '']); save(); renderTableRows(sheet);
+});
+
+document.getElementById('btnCloseSheet').addEventListener('click', () => renderSheets());
+
+function deleteSheet(id) {
+  if (confirm('Delete this spreadsheet permanently?')) {
+    DB.sheets = DB.sheets.filter(s => s.id !== id);
+    save(); renderSheets(); toast('Spreadsheet deleted');
+  }
+}
+
+document.getElementById('btnCsv').addEventListener('click', () => {
+  const sheet = DB.sheets.find(s => s.id === currentSheetId);
+  if (!sheet) return;
+
+  let csvContent = '\uFEFF' + sheet.headers.join(',') + '\n';
+  sheet.rows.forEach(r => {
+    let total = parseVal(r[1]) * parseVal(r[2]);
+    csvContent += `"${(r[0]||'').replace(/"/g, '""')}",${r[1]||0},${r[2]||0},${total.toFixed(2)}\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${sheet.name.toLowerCase().replace(/\s+/g, '_')}.csv`;
+  a.click();
+});
+
+/* ================= CALENDAR LOGIC ================= */
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  currentCalDate.setMonth(currentCalDate.getMonth() - 1); renderCalendar();
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  currentCalDate.setMonth(currentCalDate.getMonth() + 1); renderCalendar();
+});
+
+function formatDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderCalendar() {
+  const year = currentCalDate.getFullYear();
+  const month = currentCalDate.getMonth();
+  document.getElementById('monthLabel').textContent = `${monthNames[month]} ${year}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = dayNames.map(d => `<div class="dow">${d}</div>`).join('');
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const todayStr = formatDateStr(new Date());
+  const selectedStr = formatDateStr(selectedCalDate);
+
+  document.getElementById('calCount').textContent = `${DB.events.length} Events`;
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    grid.innerHTML += `<div class="cal-day muted">${prevMonthDays - i}</div>`;
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(year, month, day);
+    const dateStr = formatDateStr(dateObj);
+    const isToday = (dateStr === todayStr);
+    const isSelected = (dateStr === selectedStr);
+    const hasEvent = DB.events.some(e => e.date === dateStr);
+    grid.innerHTML += `
+      <button class="cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="selectCalDate('${dateStr}')">
+        <span>${day}</span>
+        ${hasEvent ? '<span class="dot"></span>' : ''}
+      </button>`;
+  }
+}
+
+function selectCalDate(dateStr) {
+  const parts = dateStr.split('-');
+  selectedCalDate = new Date(parts[0], parts[1] - 1, parts[2]);
+  renderCalendar(); renderEventsForDate(selectedCalDate);
+}
+
+function renderEventsForDate(dateObj) {
+  const container = document.getElementById('dayEvents');
+  const dateStr = formatDateStr(dateObj);
+  const events = DB.events.filter(e => e.date === dateStr);
+  const displayDate = `${monthNames[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}`;
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h4 style="font-size:20px;font-family:var(--bc-font-heading)">Events for ${displayDate}</h4>
+      <button class="btn btn-gold btn-sm" onclick="openEventModal('${dateStr}')">+ Add Event</button>
+    </div>
+  `;
+
+  if (events.length === 0) {
+    html += `<div class="empty" style="padding:20px 0"><p style="margin:0">No scheduled events for this day.</p></div>`;
+  } else {
+    html += '<div class="rows">';
+    html += events.map(ev => `
+      <div class="ev-row">
+        <span class="ev-time">${escapeHtml(ev.time || 'All Day')}</span>
+        <div class="ev-body">
+          <strong>${escapeHtml(ev.title)}</strong>
+          ${ev.note ? `<em>${escapeHtml(ev.note)}</em>` : ''}
+        </div>
+        <button class="row-del-btn" onclick="deleteEvent('${ev.id}')" title="Delete event">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    `).join('');
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function openEventModal(dateStr) {
+  openModal(`
+    <h3>Add Calendar Event</h3>
+    <form id="evFrm">
+      <label class="f-label">Event Date</label>
+      <input type="date" id="evDate" value="${dateStr}" required>
+      <label class="f-label">Time (Optional)</label>
+      <input type="time" id="evTime" value="09:00">
+      <label class="f-label">Event Title</label>
+      <input type="text" id="evTitle" placeholder="Meeting, Grocery Day, Payment..." required>
+      <label class="f-label">Notes / Description</label>
+      <textarea id="evNote" rows="3" placeholder="Additional info..."></textarea>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-quiet" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Event</button>
+      </div>
+    </form>
+  `);
+
+  document.getElementById('evFrm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = document.getElementById('evDate').value;
+    const t = document.getElementById('evTime').value;
+    const title = document.getElementById('evTitle').value.trim();
+    const note = document.getElementById('evNote').value.trim();
+
+    DB.events.push({ id: 'e_' + Date.now(), date: d, time: t, title, note });
+    save(); closeModal(); renderCalendar(); selectCalDate(d); renderRoutine(); toast('Event added');
+  });
+}
+
+function deleteEvent(id) {
+  if (confirm('Delete this event?')) {
+    DB.events = DB.events.filter(e => e.id !== id);
+    save(); renderCalendar(); renderEventsForDate(selectedCalDate); renderRoutine(); toast('Event removed');
+  }
+}
+
+/* ================= ROUTINE LOGIC ================= */
+function renderRoutine() {
+  const container = document.getElementById('routineList');
+  const countEl = document.getElementById('routineCount');
+
+  const groups = {};
+  DB.events.forEach(ev => {
+    if (!groups[ev.date]) groups[ev.date] = [];
+    groups[ev.date].push(ev);
+  });
+
+  const dates = Object.keys(groups).sort();
+
+  if (dates.length === 0) {
+    countEl.textContent = '0 Days';
+    container.innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <strong>No Routine Yet</strong>
+        <p>Events you add to the calendar will appear here, grouped by day so you can review your routine.</p>
+        <button class="btn btn-gold btn-sm" onclick="openEventModal('${formatDateStr(new Date())}')">Add First Event</button>
+      </div>`;
+    return;
+  }
+
+  countEl.textContent = `${dates.length} Days`;
+
+  container.innerHTML = dates.map(dateStr => {
+    const parts = dateStr.split('-');
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    const heading = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const events = groups[dateStr].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+    const eventsHtml = events.length
+      ? events.map(ev => `
+        <div class="ev-row">
+          <span class="ev-time">${escapeHtml(ev.time || 'All Day')}</span>
+          <div class="ev-body">
+            <strong>${escapeHtml(ev.title)}</strong>
+            ${ev.note ? `<em>${escapeHtml(ev.note)}</em>` : ''}
+          </div>
+          <button class="row-del-btn" onclick="deleteEvent('${ev.id}')" title="Delete event">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      `).join('')
+      : `<div class="routine-empty">No events for this day.</div>`;
+
+    return `
+      <div class="routine-day">
+        <div class="routine-date">${heading}</div>
+        <div class="rows">${eventsHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ================= BACKUP & RESTORE ================= */
+document.getElementById('btnExport').addEventListener('click', downloadBackup);
+
+function downloadBackup() {
+  const jsonStr = JSON.stringify(DB, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ledger_notes_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('Backup downloaded');
+}
+
+document.getElementById('btnImport').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (parsed && Array.isArray(parsed.notes) && Array.isArray(parsed.sheets)) {
+          DB = parsed; save(); switchView(activeView, false); toast('Data restored successfully');
+        } else {
+          alert('Invalid backup file structure.');
+        }
+      } catch(err) { alert('Failed to parse backup file.'); }
+    };
+    reader.readAsText(file);
+  }
+});
+
+document.getElementById('btnWipe').addEventListener('click', () => {
+  if (confirm('Are you sure you want to wipe all notes, spreadsheets, and calendar entries?')) {
+    DB = { notes: [], sheets: [], events: [] };
+    save(); switchView(activeView, false); toast('All data cleared');
+  }
+});
+
+/* ================= THEME PELLETS ================= */
+const THEME_KEY = 'ledgerNotes.theme';
+const THEME_NAMES = {
+  light:'Ledger Light', dark:'Ledger Dark',
+  'sepia':'Sepia Paper',
+  'solarized-light':'Solarized Light',
+  'sage':'Soft Sage',
+  'ocean':'Calm Blue',
+  'solarized-dark':'Solarized Dark',
+  'nord':'Nord',
+  'warm-dark':'Warm Charcoal'
+};
+
+/* [page background (--ground), primary (--bc-primary), accent (--bc-secondary)]
+   Must mirror the CSS variables of each html[data-theme] block. */
+const THEME_SWATCHES = {
+  'light':            ['#F6F0E6', '#1A1A1A', '#B8904A'],
+  'sepia':            ['#F4ECD8', '#5B4636', '#B07D3A'],
+  'solarized-light':  ['#FDF6E3', '#073642', '#2176AE'],
+  'sage':             ['#E8EFE4', '#2F5D46', '#86B58F'],
+  'ocean':            ['#E6EDF3', '#2C5470', '#6FA3C7'],
+  'dark':             ['#14120F', '#E9E0CC', '#B8904A'],
+  'solarized-dark':   ['#002B36', '#2AA198', '#B58900'],
+  'nord':             ['#2E3440', '#88C0D0', '#EBCB8B'],
+  'warm-dark':        ['#282828', '#D79921', '#8EC07C']
+};
+
+const THEME_ORDER = ['light','sepia','solarized-light','sage','ocean','dark','solarized-dark','nord','warm-dark'];
+
+function buildThemePellets() {
+  const wrap = document.getElementById('themePellets');
+  if (!wrap) return;
+  wrap.innerHTML = THEME_ORDER.map(t => {
+    const sw = THEME_SWATCHES[t];
+    const grad = `linear-gradient(135deg, ${sw[0]} 0 45%, ${sw[1]} 45% 72%, ${sw[2]} 72% 100%)`;
+    return `
+      <button type="button" class="pellet" data-theme="${t}" role="radio" aria-checked="false"
+              aria-label="${escapeHtml(THEME_NAMES[t])}" title="${escapeHtml(THEME_NAMES[t])}"
+              style="background:${grad}"></button>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('.pellet').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = applyTheme(btn.dataset.theme);
+      store.set(THEME_KEY, t);
+      toast(THEME_NAMES[t] + ' theme on');
+    });
+  });
+}
+
+function applyTheme(theme) {
+  if (!THEME_NAMES[theme]) theme = 'light';
+  if (theme === 'light') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', theme);
+
+  const wrap = document.getElementById('themePellets');
+  if (wrap) {
+    wrap.querySelectorAll('.pellet').forEach(p => {
+      const on = (p.dataset.theme === theme);
+      p.setAttribute('aria-pressed', on ? 'true' : 'false');
+      p.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  return theme;
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  buildThemePellets();
+  applyTheme(store.get(THEME_KEY, 'light'));
+  
+  // Initialize base view without pushing history so back exits the app
+  switchView('notes');
+});
+</script>
+</body>
+</html>
